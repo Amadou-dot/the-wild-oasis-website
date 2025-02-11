@@ -1,59 +1,44 @@
 import { Cabin } from '@/types/Cabin.type';
-import { EyeSlashIcon, MapPinIcon, UsersIcon } from '@heroicons/react/24/solid';
+import { UsersIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function CabinCard({ cabin }: { cabin: Cabin }) {
-  const { id, name, maxCapacity, regularPrice, discount, image, description } =
-    cabin;
+  const { id, name, maxCapacity, imageURL, regularPrice, discount } = cabin;
 
   return (
-    <div className='max-w-6xl mx-auto mt-8'>
-      <div className='grid grid-cols-[3fr_4fr] gap-20 border border-primary-800 py-3 px-10 mb-24'>
-        <div className='relative scale-[1.15] -translate-x-3 aspect-square'>
-          <Image
-            className='object-cover'
-            src={image}
-            fill
-            alt={`Cabin ${name}`}
-          />
-        </div>
-
-        <div>
-          <h3 className='text-accent-100 font-black text-7xl mb-5 translate-x-[-254px] bg-primary-950 p-6 pb-1 w-[150%]'>
-            Cabin {name}
-          </h3>
-
-          <p className='text-lg text-primary-300 mb-10'>{description}</p>
-
-          <ul className='flex flex-col gap-4 mb-7'>
-            <li className='flex gap-3 items-center'>
-              <UsersIcon className='h-5 w-5 text-primary-600' />
-              <span className='text-lg'>
-                For up to <span className='font-bold'>{maxCapacity}</span>{' '}
-                guests
-              </span>
-            </li>
-            <li className='flex gap-3 items-center'>
-              <MapPinIcon className='h-5 w-5 text-primary-600' />
-              <span className='text-lg'>
-                Located in the heart of the{' '}
-                <span className='font-bold'>Dolomites</span> (Italy)
-              </span>
-            </li>
-            <li className='flex gap-3 items-center'>
-              <EyeSlashIcon className='h-5 w-5 text-primary-600' />
-              <span className='text-lg'>
-                Privacy <span className='font-bold'>100%</span> guaranteed
-              </span>
-            </li>
-          </ul>
-        </div>
+    <div className='grid grid-cols-[1fr_3fr] border border-primary-900'>
+      <div className='relative'>
+        <Image 
+          src={imageURL}
+          alt={name}
+          className='object-cover border border-primary-900'
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          fill
+        />
       </div>
-
-      <div>
-        <h2 className='text-5xl font-semibold text-center'>
-          Reserve today. Pay on arrival.
-        </h2>
+      <div className='flex flex-col border border-primary-900 border-l-0 gap-2'>
+        <div className='ml-5 px-4 py-3'>
+          <h2 className='text-2xl font-medium text-accent-400 mb-5'>
+            Cabin {name}
+          </h2>
+          <div className='flex items-center space-x-2'>
+            <UsersIcon className='h-5 w-5 text-primary-200' />
+            <span>For up to <span className='font-bold'>{maxCapacity}</span> guests</span>
+          </div>
+          <p className='text-right text-2xl'>
+            ${discount ? regularPrice - discount : regularPrice} <span className={`${discount ? 'text-base text-primary-500 line-through':'hidden'}`}>{discount && `$${discount}`}</span>
+            <span className='text-base text-gray-600'> / night</span>
+          </p>
+        </div>
+        <div className='grid grid-cols-2 *:py-3 *:px-4 *:border-b-0'>
+          <div className='border border-primary-900'></div>
+          <div className='border border-primary-900 inline-block hover:bg-accent-600 transition-all hover:text-primary-950 w-full'>
+            <Link href={`/cabins/${id}`} className=''>
+              Details & reservation &rarr;
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

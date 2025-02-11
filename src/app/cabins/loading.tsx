@@ -1,5 +1,5 @@
 import Spinner from '@/components/Spinner';
 
 export default function loading() {
-  return <Spinner color='primary' label='Loading...' labelColor='primary' />
+  return <Spinner label='Loading cabin data...' color='primary' />;
 }

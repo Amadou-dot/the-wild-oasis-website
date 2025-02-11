@@ -5,17 +5,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'dclaevazetcjjkrzczpc.supabase.co',
-        port: '',
-        // pathname: '/storage/v1/object/public/cabin-images/cabin-001.jpg',
-        search: '',
+        hostname: 'deoggkjujqaqtmcjyocp.supabase.co',
+        pathname: '/storage/v1/object/public/cabin-images/*',
       },
       {
         protocol: 'https',
         hostname: 'flagcdn.com',
-        port: '',
-        // pathname: '/w20/sn.png',
-        search: '',
       },
     ],
   },

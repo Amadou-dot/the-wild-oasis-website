@@ -1,5 +1,9 @@
-function Spinner() {
-  return <div className='spinner'></div>;
-}
+import { Spinner as Loader, SpinnerProps } from '@heroui/spinner';
 
-export default Spinner;
+export default function Spinner(props: SpinnerProps) {
+  return (
+    <div className='min-w-screen flex justify-center'>
+      <Loader {...props} />
+    </div>
+  );
+}

@@ -23,6 +23,7 @@ export default function Filter() {
   };
   return (
     <Select
+      variant='underlined'
       defaultSelectedKeys={[activeFilter]}
       className='max-w-xs'
       classNames={{
@@ -57,8 +58,7 @@ export default function Filter() {
         return options.map(option => (
           <SelectElement key={option.key}>{option.data?.label}</SelectElement>
         ));
-      }}
-      variant='underlined'>
+      }}>
       {option => (
         <SelectItem
           onPress={() => handleFilterChange(option.key)}
@@ -71,7 +71,6 @@ export default function Filter() {
         </SelectItem>
       )}
     </Select>
-      
   );
 }
 
@@ -92,3 +91,5 @@ function SelectElement({
     </span>
   );
 }
+
+// TODO: Switch to tabs

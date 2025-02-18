@@ -10,3 +10,9 @@ export type SearchParams = {
 };
 
 export type CapacityFilter = 'all' | 'small' | 'medium' | 'large';
+
+export type Country = {
+  name: string;
+  flag: string;
+  independent: boolean;
+}

@@ -13,4 +13,5 @@ export type Booking = {
   userNotes: string;
   cabinId: number;
   guestId: number;
+  created_at: string;
 };

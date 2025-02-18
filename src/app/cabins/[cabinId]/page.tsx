@@ -1,4 +1,5 @@
-import { getCabinById } from '@/lib/CabinDB';
+import TextExpander from '@/components/TextExpander';
+import { getAllCabins, getCabinById } from '@/lib/CabinDB';
 import { EyeSlashIcon, MapPinIcon, UsersIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -12,6 +13,14 @@ export async function generateMetadata({ params }: props) {
   const cabin = await getCabinById(parseInt(cabinId));
   if (!cabin) return { title: 'Cabin not found' };
   return { title: `Cabin ${cabin.name}`, description: cabin.description };
+}
+
+export async function generateStaticParams() {
+  const cabins = await getAllCabins();
+  const ids = cabins?.map(cabin => {
+    return { cabinId: cabin.id.toString() };
+  });
+  return ids;
 }
 
 export default async function Page({ params }: props) {
@@ -38,7 +47,9 @@ export default async function Page({ params }: props) {
             Cabin {name}
           </h3>
 
-          <p className='text-lg text-primary-300 mb-10'>{description}</p>
+          <p className='text-lg text-primary-300 mb-10'>
+            <TextExpander>{description}</TextExpander>
+          </p>
 
           <ul className='flex flex-col gap-4 mb-7'>
             <li className='flex gap-3 items-center'>

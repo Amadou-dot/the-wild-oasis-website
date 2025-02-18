@@ -4,10 +4,19 @@ export const metadata = {
 };
 
 import CabinList from '@/components/CabinList';
+import Filter from '@/components/Filter';
 import Spinner from '@/components/Spinner';
+import { CapacityFilter } from '@/types/Other.types';
 import { Suspense } from 'react';
+// export const revalidate = 3600; // revalidate every hour // searchParams makes this unnecessary
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ capacity: CapacityFilter }>;
+}) {
+  const { capacity } = await searchParams;
+  const filter = capacity || 'all';
 
-export default async function Page() {
   return (
     <div>
       <h1 className='text-4xl mb-5 text-accent-400 font-medium'>
@@ -21,8 +30,19 @@ export default async function Page() {
         home away from home. The perfect spot for a peaceful, calm vacation.
         Welcome to paradise.
       </p>
-      <Suspense fallback={<Spinner label='Loading cabins' color='primary' labelColor='primary' />}>
-        <CabinList />
+      <Suspense
+      key={filter}
+        fallback={
+          <Spinner
+            label='Loading cabins'
+            color='primary'
+            labelColor='primary'
+          />
+        }>
+        <div className='flex justify-end'>
+        <Filter />
+        </div>
+        <CabinList filter={filter} />
       </Suspense>
     </div>
   );

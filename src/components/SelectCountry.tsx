@@ -1,11 +1,27 @@
+interface Country {
+  name: string;
+  flag: string;
+  independent: boolean;
+}
 
+type SelectCountryProps = {
+  defaultCountry: string;
+  name: string;
+  id: string;
+  className: string;
+};
+import { getCountries } from '@/lib/data-service';
 
-import { getCountries } from "@/lib/data-service";
-
-async function SelectCountry({ defaultCountry, name, id, className }) {
+async function SelectCountry({
+  defaultCountry,
+  name,
+  id,
+  className,
+}: SelectCountryProps) {
   const countries = await getCountries();
   const flag =
-    countries.find((country) => country.name === defaultCountry)?.flag ?? '';
+    countries.find((country: Country) => country.name === defaultCountry)
+      ?.flag ?? '';
 
   return (
     <select
@@ -13,10 +29,9 @@ async function SelectCountry({ defaultCountry, name, id, className }) {
       id={id}
       // Here we use a trick to encode BOTH the country name and the flag into the value. Then we split them up again later in the server action
       defaultValue={`${defaultCountry}%${flag}`}
-      className={className}
-    >
+      className={className}>
       <option value=''>Select country...</option>
-      {countries.map((c) => (
+      {countries.map((c:Country) => (
         <option key={c.name} value={`${c.name}%${c.flag}`}>
           {c.name}
         </option>

@@ -1,7 +1,7 @@
 'use client';
-import { Select, SelectItem } from '@heroui/select';
-import clsx from 'clsx';
+import { Tab, Tabs } from '@heroui/tabs';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Key } from 'react';
 
 const filterOptions = [
   { label: 'All Cabins', key: 'all' },
@@ -12,84 +12,28 @@ const filterOptions = [
 
 export default function Filter() {
   const searchParams = useSearchParams();
+  const activeFilter = searchParams.get('capacity') ?? 'all';
   const router = useRouter(); // allows for programmatic navigation
   const pathName = usePathname(); // gets the current path
-  const activeFilter = searchParams.get('capacity') ?? 'all';
-  const handleFilterChange = (value: string) => {
+  const handleFilterChange = (key: Key) => {
     const params = new URLSearchParams();
-    params.set('capacity', value);
-    console.log(value);
+    params.set('capacity', key.toString());
     router.replace(`${pathName}?${params.toString()}`, { scroll: false });
   };
   return (
-    <Select
+    <Tabs
+    classNames={{
+      tabContent: "group-data-[selected=true]:text-accent-400 text-primary-300",
+      cursor: "w-full bg-accent-500",
+    }}
       variant='underlined'
-      defaultSelectedKeys={[activeFilter]}
-      className='max-w-xs'
-      classNames={{
-        label: 'group-data-[filled=true]:-translate-y-5',
-        trigger: 'min-h-16',
-        listboxWrapper: 'max-h-[400px]',
-      }}
-      items={filterOptions}
-      label='Filter by capacity'
-      placeholder='All Cabins'
-      listboxProps={{
-        itemClasses: {
-          base: [
-            'text-primary-100',
-            'transition-opacity',
-            'data-[hover=true]:text-primary-200',
-            'data-[hover=true]:bg-primary-700',
-            'data-[selectable=true]:focus:bg-primary-600',
-            'data-[pressed=true]:opacity-70',
-            'data-[focus-visible=true]:bg-primary-500',
-          ],
-        },
-      }}
-      popoverProps={{
-        classNames: {
-          base: 'before:bg-primary-800',
-          content: 'p-0 border-small border-divider bg-primary-800',
-        },
-      }}
-      // how the selected value is rendered
-      renderValue={options => {
-        return options.map(option => (
-          <SelectElement key={option.key}>{option.data?.label}</SelectElement>
-        ));
-      }}>
-      {option => (
-        <SelectItem
-          onPress={() => handleFilterChange(option.key)}
-          key={option.key}
-          textValue={option.label}>
-          {/* the text that is displayed in the listbox */}
-          <SelectElement isActive={activeFilter === option.key}>
-            {option.label}
-          </SelectElement>
-        </SelectItem>
-      )}
-    </Select>
+      radius='none'
+      aria-label='Filter options'
+      onSelectionChange={handleFilterChange}
+      selectedKey={activeFilter}>
+      {filterOptions.map(({ label, key }) => (
+        <Tab key={key} title={label} />
+      ))}
+    </Tabs>
   );
 }
-
-function SelectElement({
-  children,
-  isActive,
-}: {
-  children: React.ReactNode | string;
-  isActive?: boolean;
-}) {
-  return (
-    <span
-      className={clsx(
-        'text-sm',
-        isActive ? 'text-accent-400' : 'text-primary-100'
-      )}>
-      {children}
-    </span>
-  );
-}
-
-// TODO: Switch to tabs

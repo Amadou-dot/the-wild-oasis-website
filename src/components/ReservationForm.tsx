@@ -1,19 +1,30 @@
-function ReservationForm() {
-  // CHANGE
-  const maxCapacity = 23;
+'use client';
 
+import { useReservation } from '@/context/ReservationContext';
+import { getFormattedDateString } from '@/lib/helperFunctions';
+import { Cabin } from '@/types/Cabin.type';
+
+function ReservationForm({ cabin }: { cabin: Cabin }) {
+  // CHANGE
+  const { maxCapacity } = cabin;
+  const { dateRange } = useReservation();
+  const formattedRange = dateRange
+    ? getFormattedDateString(dateRange)
+    : 'Start by selecting dates';
   return (
     <div className='scale-[1.01]'>
       <div className='bg-primary-800 text-primary-300 px-16 py-2 flex justify-between items-center'>
         <p>Logged in as</p>
 
         {/* <div className='flex gap-4 items-center'>
-          <img
+          <Image
             // Important to display google profile images
             referrerPolicy='no-referrer'
             className='h-8 rounded-full'
             src={user.image}
             alt={user.name}
+            width={32}
+            height={32}
           />
           <p>{user.name}</p>
         </div> */}
@@ -26,12 +37,11 @@ function ReservationForm() {
             name='numGuests'
             id='numGuests'
             className='px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm'
-            required
-          >
+            required>
             <option value='' key=''>
               Select number of guests...
             </option>
-            {Array.from({ length: maxCapacity }, (_, i) => i + 1).map((x) => (
+            {Array.from({ length: maxCapacity }, (_, i) => i + 1).map(x => (
               <option value={x} key={x}>
                 {x} {x === 1 ? 'guest' : 'guests'}
               </option>
@@ -52,7 +62,7 @@ function ReservationForm() {
         </div>
 
         <div className='flex justify-end items-center gap-6'>
-          <p className='text-primary-300 text-base'>Start by selecting dates</p>
+          <p className='text-primary-300 text-base'>{formattedRange}</p>
 
           <button className='bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300'>
             Reserve now

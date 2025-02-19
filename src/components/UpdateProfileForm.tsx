@@ -3,8 +3,9 @@ import { Button } from '@heroui/button';
 import { Form } from '@heroui/form';
 import FormInput from './FormInput';
 import SelectCountry from './SelectCountry';
+import { Country } from '@/types/Other.types';
 
-export default function UpdateProfileForm() {
+export default function UpdateProfileForm({countries}:{countries: Country[]}) {
   return (
     <Form
       className='w-full bg-primary-900 px-8 py-12 flex flex-col gap-8'
@@ -29,6 +30,7 @@ export default function UpdateProfileForm() {
         name='nationality'
         id='nationality'
         defaultCountry='Senegal'
+        countries={countries}
       />
 
       <FormInput

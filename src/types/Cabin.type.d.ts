@@ -1,4 +1,4 @@
-export type Cabin = {
+export interface Cabin {
   id: number;
   name: string;
   maxCapacity: number;
@@ -6,10 +6,9 @@ export type Cabin = {
   discount: number;
   imageURL: string;
   description: string;
-};
+}
 
-
-export type CabinPrice = {
+export interface CabinPrice {
   regularPrice: number;
   discount: number;
 }

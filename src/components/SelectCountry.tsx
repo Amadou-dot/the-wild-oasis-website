@@ -1,32 +1,21 @@
 'use client';
-import { getCountries } from '@/lib/data-service';
 import { Country } from '@/types/Other.types';
 import { Avatar } from '@heroui/avatar';
 import { Select, SelectItem } from '@heroui/select';
-import { useEffect, useState } from 'react';
 import { SelectorIcon } from './ui/SelectorIcon';
 type SelectCountryProps = {
   defaultCountry: string;
   name: string;
   id: string;
+  countries: Country[];
 };
 export default function SelectCountry({
   defaultCountry,
   name,
   id,
+  countries
 }: SelectCountryProps) {
   // const [flag, setFlag] = useState('');
-  const [countries, setCountries] = useState<Country[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      const countries = await getCountries();
-      setCountries(countries);
-      // const countryFlag =
-      //   countries.find(country => country.name === defaultCountry)?.flag ?? '';
-      // setFlag(countryFlag);
-    })();
-  }, [defaultCountry]);
 
   return (
     <Select

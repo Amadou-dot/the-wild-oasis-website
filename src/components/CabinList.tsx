@@ -1,4 +1,4 @@
-import { getAllCabins } from '@/lib/CabinDB';
+import { getAllCabins } from '@/lib/data-service';
 import CabinCard from './CabinCard';
 import { CapacityFilter } from '@/types/Other.types';
 

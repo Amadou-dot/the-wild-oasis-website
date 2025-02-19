@@ -1,3 +1,4 @@
+"use client"
 import { Spinner as Loader, SpinnerProps } from '@heroui/spinner';
 
 export default function Spinner(props: SpinnerProps) {

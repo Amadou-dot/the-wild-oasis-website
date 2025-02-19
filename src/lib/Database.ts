@@ -1,6 +1,7 @@
 import { Booking } from '@/types/Booking.type';
 import { Cabin, CabinPrice } from '@/types/Cabin.type';
 import { Guest } from '@/types/Guest.type';
+import { Settings } from '@/types/Settings.type';
 import sql, { ConnectionPool, config } from 'mssql';
 
 let database: Database;
@@ -135,7 +136,7 @@ export default class Database {
    * @param {string} email - The email address of the guest to retrieve.
    * @returns {Promise<Guest | null>} A promise that resolves to the guest object if found, or null if not found or if the database connection is not established.
    */
-  async getGuest(email: string): Promise<Guest | null> {
+  async getGuestByEmail(email: string): Promise<Guest | null> {
     if (!this.poolconnection) return null;
     const request = this.poolconnection.request();
     const result = await request
@@ -184,6 +185,33 @@ export default class Database {
     const request = this.poolconnection.request();
     const result = await request.query<Booking>('SELECT * FROM Bookings');
     return result.recordset;
+  }
+
+  async getBookedDatesByCabinId(cabinId: number): Promise<Date[] | null> {
+    if (!this.poolconnection) return null;
+    const request = this.poolconnection.request();
+    const result = await request
+      .input('cabinId', sql.Int, cabinId)
+      .query<Booking[]>(
+        'SELECT startDate FROM Bookings WHERE cabinId = @cabinId AND startDate >= GETDATE()'
+      );
+    return result.recordset.map(record => record.startDate);
+  }
+
+  async getSettings(): Promise<Settings | null> {
+    if (!this.poolconnection) return null;
+    const request = this.poolconnection.request();
+    const result = await request.query<Settings>('SELECT * FROM Settings');
+    return result.recordset[0];
+  }
+
+  async deleteBooking(id: number): Promise<number | null> {
+    if (!this.poolconnection) return null;
+    const request = this.poolconnection.request();
+    const result = await request
+      .input('id', sql.Int, id)
+      .query<number>('DELETE FROM Bookings WHERE id = @id');
+    return result.rowsAffected[0];
   }
 }
 

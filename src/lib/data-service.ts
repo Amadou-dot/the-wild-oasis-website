@@ -1,104 +1,61 @@
 
 /////////////
-// GET
+//* GET
 
 import { Country } from "@/types/Other.types";
+import { passwordConfig } from "./config";
+import { createDatabaseConnection } from "./Database";
 
-export async function getCabinPrice(id:number) {
- console.log(id);
+const database = await createDatabaseConnection(passwordConfig);
+//? Bookings
+export async function getBookingById(id: number) {
+  const data = await database.getBookingById(id);
+  return data;
 }
 
-
-// Guests are uniquely identified by their email address
-export async function getGuest(email:string) {
-  // const { data, error } = await supabase
-  //   .from('guests')
-  //   .select('*')
-  //   .eq('email', email)
-  //   .single();
-
-  // No error here! We handle the possibility of no guest in the sign in callback
-  // return data;
-  console.log(email);
+export async function getAllBookings() {
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
+  const data =  await database.getAllBookings();
+  return data;
 }
 
-export async function getBooking(id:number) {
-  // const { data, error, count } = await supabase
-  //   .from('bookings')
-  //   .select('*')
-  //   .eq('id', id)
-  //   .single();
-
-  // if (error) {
-  //   console.error(error);
-  //   throw new Error('Booking could not get loaded');
-  // }
-
-  // return data;
-  console.log(id);
+export async function getBookedDatesByCabinId(id: number) {
+  const data = await database.getBookedDatesByCabinId(id);
+  return data;
 }
 
-export async function getBookings(guestId:number) {
-  // const { data, error, count } = await supabase
-  //   .from('bookings')
-  //   // We actually also need data on the cabins as well. But let's ONLY take the data that we actually need, in order to reduce downloaded data.
-  //   .select(
-  //     'id, created_at, startDate, endDate, numNights, numGuests, totalPrice, guestId, cabinId, cabins(name, image)'
-  //   )
-  //   .eq('guestId', guestId)
-  //   .order('startDate');
-
-  // if (error) {
-  //   console.error(error);
-  //   throw new Error('Bookings could not get loaded');
-  // }
-
-  // return data;
-  console.log(guestId);
+export async function getBookingByGuestId(id: number) {
+  const data = await database.getBookingByGuestId(id);
+  return data;
 }
 
-export async function getBookedDatesByCabinId(cabinId:number) {
-  // let today = new Date();
-  // today.setUTCHours(0, 0, 0, 0);
-  // today = today.toISOString();
-
-  // // Getting all bookings
-  // const { data, error } = await supabase
-  //   .from('bookings')
-  //   .select('*')
-  //   .eq('cabinId', cabinId)
-  //   .or(`startDate.gte.${today},status.eq.checked-in`);
-
-  // if (error) {
-  //   console.error(error);
-  //   throw new Error('Bookings could not get loaded');
-  // }
-
-  // // Converting to actual dates to be displayed in the date picker
-  // const bookedDates = data
-  //   .map((booking) => {
-  //     return eachDayOfInterval({
-  //       start: new Date(booking.startDate),
-  //       end: new Date(booking.endDate),
-  //     });
-  //   })
-  //   .flat();
-
-  // return bookedDates;
-  console.log(cabinId);
+//? Cabins
+export async function getCabinById(id: number) {
+  const data = await database.getCabinById(id);
+  return data;
 }
 
+export async function getAllCabins() {
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
+  const data =  await database.getAllCabins();
+  return data;
+}
+
+export async function getCabinPrice(id: number) {
+  const data = await database.getCabinPrice(id);
+  return data;
+}
+
+//? Settings
 export async function getSettings() {
-  // const { data, error } = await supabase.from('settings').select('*').single();
-
-  // if (error) {
-  //   console.error(error);
-  //   throw new Error('Settings could not be loaded');
-  // }
-
-  // return data;
+  const data = await database.getSettings();
+  return data;
 }
 
+//? Guests
+
+
+//? Other
 export async function getCountries() {
   try {
     const res = await fetch(
@@ -112,7 +69,7 @@ export async function getCountries() {
 }
 
 /////////////
-// CREATE
+//* CREATE
 
 // export async function createGuest(newGuest) {
 //   const { data, error } = await supabase.from('guests').insert([newGuest]);
@@ -177,14 +134,9 @@ export async function getCountries() {
 
 /////////////
 // DELETE
-
+// ! This function should be used with caution as it deletes the booking from the database
+// ! and it cannot be undone
 export async function deleteBooking(id:number) {
-  // const { data, error } = await supabase.from('bookings').delete().eq('id', id);
-
-  // if (error) {
-  //   console.error(error);
-  //   throw new Error('Booking could not be deleted');
-  // }
-  // return data;
-  console.log(id);
+  const data = await database.deleteBooking(id);
+  return data;
 }

@@ -5,6 +5,7 @@ export const metadata = {
 
 import CabinList from '@/components/CabinList';
 import Filter from '@/components/Filter';
+import ReservationReminder from '@/components/ReservationReminder';
 import Spinner from '@/components/Spinner';
 import { CapacityFilter } from '@/types/Other.types';
 import { Suspense } from 'react';
@@ -31,7 +32,7 @@ export default async function Page({
         Welcome to paradise.
       </p>
       <Suspense
-      key={filter}
+        key={filter}
         fallback={
           <Spinner
             label='Loading cabins'
@@ -40,9 +41,10 @@ export default async function Page({
           />
         }>
         <div className='flex justify-end'>
-        <Filter />
+          <Filter />
         </div>
         <CabinList filter={filter} />
+        <ReservationReminder />
       </Suspense>
     </div>
   );

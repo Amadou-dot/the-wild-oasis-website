@@ -1,9 +1,11 @@
 import UpdateProfileForm from '@/components/UpdateProfileForm';
+import { getCountries } from '@/lib/data-service';
 
 export const metadata = {
   title: 'Guest profile',
 };
-export default function Page() {
+export default async function Page() {
+  const countries = await getCountries();
   return (
     <div>
       <h2 className='font-semibold text-2xl text-accent-400 mb-4'>
@@ -15,7 +17,7 @@ export default function Page() {
         faster and smoother. See you soon!
       </p>
 
-      <UpdateProfileForm />
+      <UpdateProfileForm countries={countries}/>
     </div>
   );
 }

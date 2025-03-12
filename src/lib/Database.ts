@@ -2,7 +2,10 @@ import { Booking } from '@/types/Booking.type';
 import { Cabin, CabinPrice } from '@/types/Cabin.type';
 import { Guest } from '@/types/Guest.type';
 import { Settings } from '@/types/Settings.type';
-import sql, { ConnectionPool, config } from 'mssql';
+import { supabase } from './config';
+
+// Add a check to ensure this code only runs on the server
+const isServer = typeof window === 'undefined';
 
 let database: Database;
 /**
@@ -10,44 +13,28 @@ let database: Database;
  */
 export default class Database {
   /**
-   * Configuration object for the database connection.
-   */
-  config = {} as config;
-
-  /**
-   * Connection pool instance.
-   */
-  poolconnection: ConnectionPool | null = null;
-
-  /**
    * Indicates whether the database is connected.
    */
   connected = false;
 
   /**
    * Creates an instance of Database.
-   * @param {config} config - The configuration object for the database connection.
    */
-  constructor(config: config) {
-    this.config = config;
+  constructor() {
+    if (!isServer) {
+      console.warn('Database operations should only be performed on the server');
+    }
+    this.connected = true;
   }
 
   /**
    * Connects to the database.
-   * @returns {Promise<ConnectionPool | void>} The connection pool instance or void if connection fails.
+   * @returns {Promise<void>} A promise that resolves when the connection is complete.
    */
-  async connect(): Promise<ConnectionPool | void> {
-    if (!this.config) return;
-    if (this.poolconnection) return this.poolconnection;
-    try {
-      this.poolconnection = await sql.connect(this.config);
-      this.connected = true;
-      console.log('Database connected successfully.');
-      return this.poolconnection;
-    } catch (error) {
-      console.error('Error connecting to the database:', error);
-      this.connected = false;
-    }
+  async connect(): Promise<void> {
+    if (!isServer) return;
+    console.log('Supabase client initialized');
+    this.connected = true;
   }
 
   /**
@@ -55,32 +42,9 @@ export default class Database {
    * @returns {Promise<void>} A promise that resolves when the disconnection is complete.
    */
   async disconnect(): Promise<void> {
-    try {
-      if (this.connected && this.poolconnection) {
-        await this.poolconnection.close();
-        this.connected = false;
-        console.log('Database disconnected successfully.');
-      }
-    } catch (error) {
-      console.error('Error disconnecting from the database:', error);
-    }
-  }
-
-  /**
-   * Executes a SQL query.
-   * @param {string} query - The SQL query to execute.
-   * @returns {Promise<<T>> | null} The number of rows affected by the query.
-   */
-  async executeQuery<T>(query: string): Promise<T | null> {
-    if (!this.poolconnection) return null;
-    try {
-      const request = this.poolconnection.request();
-      const result = await request.query(query);
-
-      return result.recordset as unknown as T;
-    } catch (error) {
-      console.error('Error executing query:', error);
-      return null;
+    if (this.connected) {
+      this.connected = false;
+      console.log('Database disconnected successfully.');
     }
   }
 
@@ -88,142 +52,293 @@ export default class Database {
    * Retrieves a cabin by its ID from the database.
    *
    * @param {number} id - The ID of the cabin to retrieve.
-   * @returns {Promise<Cabin | null>} A promise that resolves to the cabin object if found, or null if the connection is not established or the cabin is not found.
+   * @returns {Promise<Cabin | null>} A promise that resolves to the cabin object if found, or null if not found.
    */
   async getCabinById(id: number): Promise<Cabin | null> {
-    if (!this.poolconnection) return null;
-    const request = this.poolconnection.request();
-    const result = await request
-      .input('id', sql.Int, +id)
-      .query<Cabin>('SELECT * FROM Cabins WHERE id = @id');
-    return result.recordset[0];
+    try {
+      const { data, error } = await supabase
+        .from('Cabins')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching cabin by ID:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getCabinById:', error);
+      return null;
+    }
   }
 
   /**
    * Retrieves all cabins from the database.
    *
-   * @returns {Promise<Cabin[] | null>} A promise that resolves to an array of Cabin objects if the connection is established, or null if there is no connection.
+   * @returns {Promise<Cabin[] | null>} A promise that resolves to an array of Cabin objects.
    */
   async getAllCabins(): Promise<Cabin[] | null> {
-    if (!this.poolconnection) return null;
-    const request = this.poolconnection.request();
-    const result = await request.query<Cabin>('SELECT * FROM Cabins');
-    return result.recordset;
+    try {
+      const { data, error } = await supabase
+        .from('Cabins')
+        .select('*');
+
+      if (error) {
+        console.error('Error fetching all cabins:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getAllCabins:', error);
+      return null;
+    }
   }
 
   /**
    * Retrieves the price details of a cabin by its ID.
    *
    * @param {number} id - The unique identifier of the cabin.
-   * @returns {Promise<CabinPrice | null>} - A promise that resolves to the cabin price details, or null if the connection is not established.
-   *
-   * @throws {Error} - Throws an error if the query execution fails.
+   * @returns {Promise<CabinPrice | null>} - A promise that resolves to the cabin price details.
    */
   async getCabinPrice(id: number): Promise<CabinPrice | null> {
-    if (!this.poolconnection) return null;
-    const request = this.poolconnection.request();
-    const result = await request
-      .input('id', sql.Int, +id)
-      .query<CabinPrice>(
-        'SELECT regularPrice, discount FROM Cabins WHERE id = @id'
-      );
-    return result.recordset[0];
+    try {
+      const { data, error } = await supabase
+        .from('Cabins')
+        .select('regularPrice, discount')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching cabin price:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getCabinPrice:', error);
+      return null;
+    }
   }
 
   /**
    * Retrieves a guest from the database using their email address.
    *
    * @param {string} email - The email address of the guest to retrieve.
-   * @returns {Promise<Guest | null>} A promise that resolves to the guest object if found, or null if not found or if the database connection is not established.
+   * @returns {Promise<Guest | null>} A promise that resolves to the guest object if found, or null if not found.
    */
   async getGuestByEmail(email: string): Promise<Guest | null> {
-    if (!this.poolconnection) return null;
-    const request = this.poolconnection.request();
-    const result = await request
-      .input('email', sql.VarChar, email)
-      .query<Guest>('SELECT * FROM Guests WHERE email = @email');
-    return result.recordset[0];
+    try {
+      const { data, error } = await supabase
+        .from('Guests')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (error) {
+        console.error('Error fetching guest by email:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getGuestByEmail:', error);
+      return null;
+    }
   }
 
   /**
    * Retrieves a booking from the database by its ID.
    *
    * @param {number} id - The ID of the booking to retrieve.
-   * @returns {Promise<Booking | null>} A promise that resolves to the booking object if found, or null if the connection is not established or the booking is not found.
+   * @returns {Promise<Booking | null>} A promise that resolves to the booking object if found, or null if not found.
    */
   async getBookingById(id: number): Promise<Booking | null> {
-    if (!this.poolconnection) return null;
-    const request = this.poolconnection.request();
-    const result = await request
-      .input('id', sql.Int, +id)
-      .query<Booking>('SELECT * FROM Bookings WHERE id = @id');
-    return result.recordset[0];
+    try {
+      const { data, error } = await supabase
+        .from('Bookings')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching booking by ID:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getBookingById:', error);
+      return null;
+    }
   }
 
   /**
    * Retrieves booking information for a given guest ID.
    *
    * @param guestId - The ID of the guest whose booking information is to be retrieved.
-   * @returns {Promise<Booking | null>} A promise that resolves to an array of booking records for the specified guest ID, or null if the database connection is not established.
+   * @returns {Promise<Booking | null>} A promise that resolves to an array of booking records for the specified guest ID.
    */
   async getBookingByGuestId(guestId: number): Promise<Booking | null> {
-    if (!this.poolconnection) return null;
-    const request = this.poolconnection.request();
-    const result = await request
-      .input('guestId', sql.Int, +guestId)
-      .query<Booking>('SELECT * FROM Bookings WHERE guestId = @guestId');
-    return result.recordset[0];
+    try {
+      const { data, error } = await supabase
+        .from('Bookings')
+        .select('*')
+        .eq('guestId', guestId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching booking by guest ID:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getBookingByGuestId:', error);
+      return null;
+    }
   }
 
   /**
    * Retrieves all bookings from the database.
    *
-   * @returns {Promise<Booking[] | null>} A promise that resolves to an array of bookings if the connection is available, otherwise null.
+   * @returns {Promise<Booking[] | null>} A promise that resolves to an array of bookings.
    */
   async getAllBookings(): Promise<Booking[] | null> {
-    if (!this.poolconnection) return null;
-    const request = this.poolconnection.request();
-    const result = await request.query<Booking>('SELECT * FROM Bookings');
-    return result.recordset;
+    try {
+      const { data, error } = await supabase
+        .from('Bookings')
+        .select('*');
+
+      if (error) {
+        console.error('Error fetching all bookings:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getAllBookings:', error);
+      return null;
+    }
   }
 
+  /**
+   * Retrieves booked dates for a specific cabin.
+   * 
+   * @param {number} cabinId - The ID of the cabin.
+   * @returns {Promise<Date[] | null>} A promise that resolves to an array of booked dates.
+   */
   async getBookedDatesByCabinId(cabinId: number): Promise<Date[] | null> {
-    if (!this.poolconnection) return null;
-    const request = this.poolconnection.request();
-    const result = await request
-      .input('cabinId', sql.Int, cabinId)
-      .query<Booking[]>(
-        'SELECT startDate FROM Bookings WHERE cabinId = @cabinId AND startDate >= GETDATE()'
-      );
-    return result.recordset.map(record => record.startDate);
+    try {
+      const { data, error } = await supabase
+        .from('Bookings')
+        .select('startDate')
+        .eq('cabinId', cabinId)
+        .gte('startDate', new Date().toISOString());
+
+      if (error) {
+        console.error('Error fetching booked dates:', error);
+        return null;
+      }
+
+      return data.map(record => record.startDate);
+    } catch (error) {
+      console.error('Error in getBookedDatesByCabinId:', error);
+      return null;
+    }
   }
 
+  /**
+   * Retrieves settings from the database.
+   * 
+   * @returns {Promise<Settings | null>} A promise that resolves to the settings object.
+   */
   async getSettings(): Promise<Settings | null> {
-    if (!this.poolconnection) return null;
-    const request = this.poolconnection.request();
-    const result = await request.query<Settings>('SELECT * FROM Settings');
-    return result.recordset[0];
+    try {
+      const { data, error } = await supabase
+        .from('Settings')
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Error fetching settings:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getSettings:', error);
+      return null;
+    }
   }
 
+  /**
+   * Deletes a booking from the database.
+   * 
+   * @param {number} id - The ID of the booking to delete.
+   * @returns {Promise<number | null>} A promise that resolves to the number of affected rows.
+   */
   async deleteBooking(id: number): Promise<number | null> {
-    if (!this.poolconnection) return null;
-    const request = this.poolconnection.request();
-    const result = await request
-      .input('id', sql.Int, id)
-      .query<number>('DELETE FROM Bookings WHERE id = @id');
-    return result.rowsAffected[0];
+    try {
+      const { error } = await supabase
+        .from('Bookings')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting booking:', error);
+        return null;
+      }
+
+      return 1; // Return 1 to indicate successful deletion
+    } catch (error) {
+      console.error('Error in deleteBooking:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Creates a new guest in the database.
+   * 
+   * @param {Omit<Guest, 'id' | 'created_at'>} guest - The guest data to insert.
+   * @returns {Promise<number | null>} A promise that resolves to the ID of the created guest.
+   */
+  async createGuest(
+    guest: Omit<Guest, 'id' | 'created_at'>
+  ): Promise<number | null> {
+    try {
+      const { data, error } = await supabase
+        .from('Guests')
+        .insert([guest])
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('Error creating guest:', error);
+        return null;
+      }
+
+      return data.id;
+    } catch (error) {
+      console.error('Error in createGuest:', error);
+      return null;
+    }
   }
 }
 
 /**
- * Creates a new database connection and initializes the Person table.
- * @param {config} passwordConfig - The configuration object for the database connection.
+ * Creates a new database connection.
  * @returns {Promise<Database>} The database instance.
  */
-export const createDatabaseConnection = async (
-  passwordConfig: config
-): Promise<Database> => {
-  database = new Database(passwordConfig);
+export const createDatabaseConnection = async (): Promise<Database> => {
+  if (!isServer) {
+    console.warn('Database connections should only be created on the server');
+    return new Database();
+  }
+  
+  database = new Database();
   await database.connect();
   return database;
 };

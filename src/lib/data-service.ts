@@ -1,60 +1,99 @@
+import { Country } from '@/types/Other.types';
+import { passwordConfig } from './config';
+import Database, { createDatabaseConnection } from './Database';
+import { Guest } from '@/types/Guest.type';
+
+// Add a check to ensure database operations only run on the server
+const isServer = typeof window === 'undefined';
+
+let database: Database | null = null;
+
+async function getDatabase(): Promise<Database> {
+  if (!isServer) {
+    throw new Error('Database operations can only be performed on the server');
+  }
+  
+  if (!database) {
+    database = await createDatabaseConnection(passwordConfig);
+  }
+  return database;
+}
 
 /////////////
 //* GET
-
-import { Country } from "@/types/Other.types";
-import { passwordConfig } from "./config";
-import { createDatabaseConnection } from "./Database";
-
-const database = await createDatabaseConnection(passwordConfig);
 //? Bookings
 export async function getBookingById(id: number) {
-  const data = await database.getBookingById(id);
+  if (!isServer) return null;
+  const db = await getDatabase();
+  const data = await db.getBookingById(id);
   return data;
 }
 
 export async function getAllBookings() {
-  // await new Promise((resolve) => setTimeout(resolve, 2000));
-  const data =  await database.getAllBookings();
+  if (!isServer) return null;
+  const db = await getDatabase();
+  const data = await db.getAllBookings();
   return data;
 }
 
 export async function getBookedDatesByCabinId(id: number) {
-  const data = await database.getBookedDatesByCabinId(id);
+  if (!isServer) return null;
+  const db = await getDatabase();
+  const data = await db.getBookedDatesByCabinId(id);
   return data;
 }
 
 export async function getBookingByGuestId(id: number) {
-  const data = await database.getBookingByGuestId(id);
+  if (!isServer) return null;
+  const db = await getDatabase();
+  const data = await db.getBookingByGuestId(id);
   return data;
 }
 
 //? Cabins
 export async function getCabinById(id: number) {
-  const data = await database.getCabinById(id);
+  if (!isServer) return null;
+  const db = await getDatabase();
+  const data = await db.getCabinById(id);
   return data;
 }
 
 export async function getAllCabins() {
-  // await new Promise((resolve) => setTimeout(resolve, 2000));
-  const data =  await database.getAllCabins();
+  if (!isServer) return null;
+  const db = await getDatabase();
+  const data = await db.getAllCabins();
   return data;
 }
 
 export async function getCabinPrice(id: number) {
-  const data = await database.getCabinPrice(id);
+  if (!isServer) return null;
+  const db = await getDatabase();
+  const data = await db.getCabinPrice(id);
   return data;
 }
 
 //? Settings
 export async function getSettings() {
-  const data = await database.getSettings();
+  if (!isServer) return null;
+  const db = await getDatabase();
+  const data = await db.getSettings();
   return data;
 }
 
 //? Guests
+export async function getGuestByEmail(email: string) {
+  if (!isServer) return null;
+  const db = await getDatabase();
+  const data = await db.getGuestByEmail(email);
+  return data;
+}
 
-
+export async function createGuest(newGuest: Omit<Guest, 'id' | 'created_at'>) {
+  if (!isServer) return null;
+  const db = await getDatabase();
+  const data = await db.createGuest(newGuest);
+  return data;
+}
 //? Other
 export async function getCountries() {
   try {
@@ -62,7 +101,7 @@ export async function getCountries() {
       'https://restcountries.com/v2/all?fields=name,flag'
     );
     const countries = await res.json();
-    return countries as  Country[];
+    return countries as Country[];
   } catch {
     throw new Error('Could not fetch countries');
   }
@@ -136,7 +175,8 @@ export async function getCountries() {
 // DELETE
 // ! This function should be used with caution as it deletes the booking from the database
 // ! and it cannot be undone
-export async function deleteBooking(id:number) {
-  const data = await database.deleteBooking(id);
+export async function deleteBooking(id: number) {
+  const db = await getDatabase();
+  const data = await db.deleteBooking(id);
   return data;
 }

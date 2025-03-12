@@ -1,6 +1,6 @@
 import { DateValue, getLocalTimeZone } from '@internationalized/date';
 import { RangeValue } from '@react-types/shared';
-import { format, isWithinRange } from 'date-fns';
+import { format } from 'date-fns';
 
 export const validateMinimumRange = (
   value: RangeValue<DateValue> | null,
@@ -15,22 +15,22 @@ export const validateMinimumRange = (
   );
 };
 
-export function isAlreadyBooked(
-  range: RangeValue<DateValue>,
-  datesArr: Date[]
-) {
-  return (
-    range.start &&
-    range.end &&
-    datesArr.some(date =>
-      isWithinRange(
-        date,
-        range.start.toDate(getLocalTimeZone()),
-        range.end.toDate(getLocalTimeZone())
-      )
-    )
-  );
-}
+// export function isAlreadyBooked(
+//   range: RangeValue<DateValue>,
+//   datesArr: Date[]
+// ) {
+//   return (
+//     range.start &&
+//     range.end &&
+//     datesArr.some(date =>
+//       isWithinRange(
+//         date,
+//         range.start.toDate(getLocalTimeZone()),
+//         range.end.toDate(getLocalTimeZone())
+//       )
+//     )
+//   );
+// }
 
 export function getFormattedDateString(date: RangeValue<DateValue>) {
   return `From ${format(

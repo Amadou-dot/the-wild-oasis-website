@@ -1,20 +1,8 @@
-import { config } from 'mssql';
+import { createClient } from '@supabase/supabase-js';
 
-const server = process.env.AZURE_SQL_SERVER;
-const database = process.env.AZURE_SQL_DATABASE;
-const port = process.env.AZURE_SQL_PORT
-  ? parseInt(process.env.AZURE_SQL_PORT)
-  : 1433;
-const user = process.env.AZURE_SQL_USER;
-const password = process.env.AZURE_SQL_PASSWORD;
+// Supabase configuration
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-export const passwordConfig: config = {
-  server: server || '',
-  port,
-  database,
-  user,
-  password,
-  options: {
-    encrypt: true,
-  },
-};
+// Initialize the Supabase client
+export const supabase = createClient(supabaseUrl, supabaseKey);

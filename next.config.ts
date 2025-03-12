@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
@@ -12,8 +12,28 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'flagcdn.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
     ],
   },
-}
+  webpack: (config, { isServer }) => {
+    // Add fallbacks for node: protocol imports
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      stream: require.resolve('stream-browserify'),
+      crypto: require.resolve('crypto-browserify'),
+      http: require.resolve('stream-http'),
+      https: require.resolve('https-browserify'),
+      buffer: require.resolve('buffer'),
+      fs: false,
+      path: false,
+    };
+    
+    return config;
+  },
+};
 
 export default nextConfig;
+// inaccessible

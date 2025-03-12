@@ -5,6 +5,7 @@ export const metadata = {
   title: 'Guest profile',
 };
 export default async function Page() {
+  // get countries and pass it down.
   const countries = await getCountries();
   return (
     <div>
